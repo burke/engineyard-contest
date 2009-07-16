@@ -46,15 +46,17 @@ permute_case(unsigned long long seqnum, unsigned char *phrase)
 int
 main(int argc, char* argv[])
 {
-  unsigned char phrase[66] = "ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby XXXXX";
+  unsigned char phrase[61] = "ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ";
   unsigned char hash[20];
-  unsigned char *sfx = (phrase + SUFFIX_OFFSET);
+  unsigned char sfx[6] = "XXXXX";
   unsigned long long case_perm = 0;
   unsigned long long suffix_perm = 0;
   int j;
-  int len = strlen((char*) phrase);
   int distance;
   int min_distance = 1000000;
+
+  SHA_CTX *suffctx = malloc(sizeof(SHA_CTX));
+  SHA_CTX *casectx = malloc(sizeof(SHA_CTX));
   
   /* Parse Command Line for starting point (or not) */
   switch (argc)
@@ -75,10 +77,18 @@ main(int argc, char* argv[])
   for (/* case_perm */; case_perm < CASE_SPACE; ++case_perm)
   {
     permute_case(case_perm, phrase);
+
+    SHA1_Init(casectx);
+    SHA1_Update(casectx, phrase, strlen((char*) phrase));
+    
     for (/* suffix_perm */; suffix_perm < SUFFIX_SPACE; ++suffix_perm)
     {
       permute_suffix(suffix_perm, sfx);
-      SHA1(phrase, len, hash);
+
+      memcpy(suffctx, casectx, sizeof(SHA_CTX));
+      memcpy(suffctx->data, casectx->data, sizeof(SHA_LONG)*SHA_LBLOCK);
+      SHA1_Update(suffctx, sfx, 5);
+      SHA1_Final(hash,suffctx);
 
       distance = hamming_distance_from_goal(hash);
       if (distance < min_distance)
@@ -86,7 +96,7 @@ main(int argc, char* argv[])
         min_distance = distance;
         for (j = 0; j < 20; j++)
           printf("%02x", hash[j]);
-        printf(" : %llu : %llu : %d : %s\n", case_perm, suffix_perm, distance, phrase);
+        printf(" : %llu : %llu : %d : %s%s\n", case_perm, suffix_perm, distance, phrase, sfx);
       }
     }
   }

@@ -9,7 +9,8 @@
 // `"ruby "*12` size is (5*12)=60
 #define SUFFIX_OFFSET 60
 
-#define SUFFIX_SPACE 6956883693ULL
+//#define SUFFIX_SPACE 6956883693ULL
+#define SUFFIX_SPACE 4294967295UL
 #define CASE_SPACE 281474976710656ULL
 
 #define WORD_SIZE 4
@@ -58,7 +59,7 @@ main(int argc, char* argv[])
   unsigned char hash[20];
   unsigned char sfx[6] = "XXXXX";
   unsigned long long case_perm = 0;
-  unsigned long long suffix_perm = 0;
+  unsigned long suffix_perm = 0;
   int j;
   int distance;
   int min_distance = 1000000;
@@ -127,7 +128,7 @@ main(int argc, char* argv[])
         for (j = 0; j < 20; j++)
           // Hex representation makes a lot more sense to humans.
           printf("%02x", hash[j]);
-        printf(" : %llu : %llu : %d : %s%s\n", case_perm, suffix_perm, distance, phrase, sfx);
+        printf(" : %llu : %lu : %d : %s%s\n", case_perm, suffix_perm, distance, phrase, sfx);
       }
     }
   }

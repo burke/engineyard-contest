@@ -72,8 +72,6 @@ main(int argc, char* argv[])
       set_goal("6cac827bae250971a8b1fb6e2a96676f7a077b60");
   }  
   
-
-  
   for (/* case_perm */; case_perm < CASE_SPACE; ++case_perm)
   {
     permute_case(case_perm, phrase);
@@ -90,8 +88,6 @@ main(int argc, char* argv[])
           printf("%02x", hash[j]);
         printf(" : %llu : %llu : %d : %s\n", case_perm, suffix_perm, distance, phrase);
       }
-      
-      
     }
   }
 

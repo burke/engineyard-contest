@@ -12,13 +12,9 @@ set_goal(char* goal)
   int i;
   
   build_hamming_table();
-
   
   for (i=0; i<20; ++i)
-  {
-    
-  }
-  
+    sscanf(goal+(2*i), "%02x", (unsigned int *) &GOAL[i]);
 }
 
 int

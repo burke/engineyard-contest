@@ -4,7 +4,7 @@
 #include <string.h>
 #include <openssl/sha.h>
 
-//#include "hamming_distance.h"
+#include "hamming_distance.h"
 
 // `"ruby "*12` size is (5*12)=60
 #define SUFFIX_OFFSET 60
@@ -55,7 +55,7 @@ main()
   int len = strlen((char*) phrase);
   int distance;
 
-//  set_goal("6cac827bae250971a8b1fb6e2a96676f7a077b60");
+  set_goal("6cac827bae250971a8b1fb6e2a96676f7a077b60");
   
   for (case_perm = 0; case_perm < CASE_SPACE; ++case_perm)
   {
@@ -65,13 +65,13 @@ main()
       permute_suffix(suffix_perm, sfx);
       SHA1(phrase, len, hash);
 
-//      distance = hamming_distance_from_goal(hash);
+      distance = hamming_distance_from_goal(hash);
       
       for (j = 0; j < 20; j++) {
-        printf("%02x(%d),", hash[j],hash[j]);
+        printf("%02x", hash[j]);
       }
       
-      printf(",%llu,%llu\n", case_perm, suffix_perm);
+      printf(",%llu,%llu : %d\n", case_perm, suffix_perm, distance);
     }
   }
 

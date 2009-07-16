@@ -54,7 +54,8 @@ main()
   int j;
   int len = strlen((char*) phrase);
   int distance;
-
+  int min_distance = 1000000;
+  
   set_goal("6cac827bae250971a8b1fb6e2a96676f7a077b60");
   
   for (case_perm = 0; case_perm < CASE_SPACE; ++case_perm)
@@ -66,12 +67,15 @@ main()
       SHA1(phrase, len, hash);
 
       distance = hamming_distance_from_goal(hash);
-      
-      for (j = 0; j < 20; j++) {
-        printf("%02x", hash[j]);
+      if (distance < min_distance) {
+        min_distance = distance;
+        for (j = 0; j < 20; j++) {
+          printf("%02x", hash[j]);
+        }
+        printf(",%llu,%llu : %d\n", case_perm, suffix_perm, distance);
       }
       
-      printf(",%llu,%llu : %d\n", case_perm, suffix_perm, distance);
+      
     }
   }
 

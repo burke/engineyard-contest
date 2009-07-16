@@ -23,11 +23,8 @@ hamming_distance_from_goal(unsigned char* hash)
   int i;
   int distance = 0;
 
-  for (i = 0; i < 20; ++i) {
-    printf("%d,",HAM_TABLE[GOAL[i]][hash[i]]);
+  for (i = 0; i < 20; ++i)
     distance += HAM_TABLE[GOAL[i]][hash[i]];
-
-  }
     
   return distance;
 }

@@ -1,5 +1,6 @@
 #include "table_generated.h"
 void build_hamming_table(){
+extern int HAM_TABLE[256][256];
 HAM_TABLE[0][0] = 0;
 HAM_TABLE[0][1] = 1;
 HAM_TABLE[0][2] = 1;

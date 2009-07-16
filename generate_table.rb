@@ -10,6 +10,7 @@ end
 
 puts '#include "table_generated.h"'
 puts "void build_hamming_table(){"
+puts "extern int HAM_TABLE[256][256];"
 
 (0..255).each do |i|
   (0..255).each do |j|

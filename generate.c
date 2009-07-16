@@ -44,7 +44,7 @@ permute_case(unsigned long long seqnum, unsigned char *phrase)
 }
 
 int
-main()
+main(int argc, char* argv[])
 {
   unsigned char phrase[66] = "ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby XXXXX";
   unsigned char hash[20];
@@ -56,12 +56,23 @@ main()
   int distance;
   int min_distance = 1000000;
   
+  /* Parse Command Line for starting point (or not) */
+  if (argc == 3) { // We have case and suffix permutation numbers...
+    case_perm = atoi(argv[1]);
+    suffix_perm = atoi(argv[2]);
+  }
+  else {
+    case_perm = 0;
+    suffix_perm = 0;
+  }
+  
+  
   set_goal("6cac827bae250971a8b1fb6e2a96676f7a077b60");
   
-  for (case_perm = 0; case_perm < CASE_SPACE; ++case_perm)
+  for (/* case_perm */; case_perm < CASE_SPACE; ++case_perm)
   {
     permute_case(case_perm, phrase);
-    for (suffix_perm = 0; suffix_perm < SUFFIX_SPACE; ++suffix_perm)
+    for (/* suffix_perm */; suffix_perm < SUFFIX_SPACE; ++suffix_perm)
     {
       permute_suffix(suffix_perm, sfx);
       SHA1(phrase, len, hash);

@@ -57,17 +57,21 @@ main(int argc, char* argv[])
   int min_distance = 1000000;
   
   /* Parse Command Line for starting point (or not) */
-  if (argc == 3) { // We have case and suffix permutation numbers...
-    case_perm = atoi(argv[1]);
-    suffix_perm = atoi(argv[2]);
-  }
-  else {
-    case_perm = 0;
-    suffix_perm = 0;
-  }
+  switch (argc) {
+    case 4:
+      suffix_perm = atoi(argv[3]);
+    case 3:
+      case_perm = atoi(argv[2]);
+    case 2:
+      set_goal(argv[1]);
+      break;
+    default:
+      case_perm = 0;
+      suffix_perm = 0;
+      set_goal("6cac827bae250971a8b1fb6e2a96676f7a077b60");
+  }  
   
-  
-  set_goal("6cac827bae250971a8b1fb6e2a96676f7a077b60");
+
   
   for (/* case_perm */; case_perm < CASE_SPACE; ++case_perm)
   {

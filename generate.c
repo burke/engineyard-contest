@@ -72,7 +72,7 @@ main()
         for (j = 0; j < 20; j++) {
           printf("%02x", hash[j]);
         }
-        printf(",%llu,%llu : %d\n", case_perm, suffix_perm, distance);
+        printf(" : %llu : %llu : %d : %s\n", case_perm, suffix_perm, distance, phrase);
       }
       
       

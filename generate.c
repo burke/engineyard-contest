@@ -6,6 +6,13 @@
 
 #include "hamming_distance.h"
 
+#ifndef TYPES
+#define TYPES
+typedef unsigned char uchar;
+typedef unsigned long ulong;
+typedef unsigned long long ullong;
+#endif
+
 // `"ruby "*12` size is (5*12)=60
 #define SUFFIX_OFFSET 60
 
@@ -14,10 +21,6 @@
 #define CASE_SPACE 281474976710656ULL
 
 #define WORD_SIZE 4
-
-typedef unsigned char uchar;
-typedef unsigned long ulong;
-typedef unsigned long long ullong;
 
 void
 permute_suffix(ulong seqnum, uchar *suffix)
@@ -97,7 +100,7 @@ main(int argc, char* argv[])
   // rehashing the phrase portion each time the suffix changes
   // ~42% performance boost.
   
-  for (/* case_perm */; case_perm < CASE_SPACE; ++case_perm)
+  for (/* case_perm */; case_perm < 1; ++case_perm)
   {
     permute_case(case_perm, phrase);
 
@@ -105,7 +108,7 @@ main(int argc, char* argv[])
     SHA1_Init(casectx);
     SHA1_Update(casectx, phrase, strlen((char*) phrase));
     
-    for (/* suffix_perm */; suffix_perm < SUFFIX_SPACE; ++suffix_perm)
+    for (/* suffix_perm */; suffix_perm < 20000000; ++suffix_perm)
     {
       // Update sfx with the next suffix.
       permute_suffix(suffix_perm, sfx);

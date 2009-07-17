@@ -2,23 +2,47 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "table_generated.h"
+//#include "table_generated.h"
 
-static unsigned char GOAL[20];
-extern int HAM_TABLE[256][256];
+#include "hamming_distance.h"
+
+static uchar GOAL[20];
+
+int HAM_TABLE[256][256];
+
 
 void
 set_goal(char* goal)
 {
   int i;
-  build_hamming_table();
+  int j;
+
+  for (i=0; i<256; ++i)
+    for (j=0; j<256; ++j)
+      HAM_TABLE[i][j] = hamming_distance(i, j);
   
   for (i=0; i<20; ++i)
     sscanf(goal+(2*i), "%02x", (unsigned int *) &GOAL[i]);
 }
 
+
 int
-hamming_distance_from_goal(unsigned char* hash)
+hamming_distance(uchar a, uchar b)
+{
+  uchar c = a ^ b;
+  int total = 0;
+  while (c > 0)
+  {
+    if (c % 2)
+      ++total;
+    c >>= 1;
+  }
+  return total;
+}
+
+
+int
+hamming_distance_from_goal(uchar* hash)
 {
   int i;
   int distance = 0;

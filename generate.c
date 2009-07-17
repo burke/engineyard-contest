@@ -15,14 +15,17 @@
 
 #define WORD_SIZE 4
 
+typedef unsigned char uchar;
+typedef unsigned long ulong;
+typedef unsigned long long ullong;
 
 void
-permute_suffix(unsigned long seqnum, unsigned char *suffix)
+permute_suffix(ulong seqnum, uchar *suffix)
 {
-  unsigned char *cp;
+  uchar *cp;
   for (cp = suffix; cp < suffix+5; ++cp)
   {
-    *cp = (unsigned char)(33 + (seqnum & 63));
+    *cp = (uchar)(33 + (seqnum & 63));
     seqnum >>= 6;
   }
 }
@@ -32,10 +35,10 @@ permute_suffix(unsigned long seqnum, unsigned char *suffix)
 // 1101 maps to RUbY, and so on. We skip over blanks, using mod, since we
 // know they happen every 5 chars. 
 void
-permute_case(unsigned long long seqnum, unsigned char *phrase)
+permute_case(ullong seqnum, uchar *phrase)
 {
   int i;
-  unsigned char *cp = phrase;
+  uchar *cp = phrase;
   for (i=0; i < 48; ++i)
   {
     if (!(i % WORD_SIZE) && (i != 0)) cp++; // Skip over spaces.
@@ -52,11 +55,11 @@ permute_case(unsigned long long seqnum, unsigned char *phrase)
 int
 main(int argc, char* argv[])
 {
-  unsigned char phrase[61] = "ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ";
-  unsigned char hash[20];
-  unsigned char sfx[6] = "XXXXX";
-  unsigned long long case_perm = 0;
-  unsigned long suffix_perm = 0;
+  uchar phrase[61] = "ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ";
+  uchar hash[20];
+  uchar sfx[6] = "XXXXX";
+  ullong case_perm = 0;
+  ulong suffix_perm = 0;
   int j;
   int distance;
   int min_distance = 1000000;

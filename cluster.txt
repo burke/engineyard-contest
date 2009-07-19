@@ -1,0 +1,7 @@
+switch:
+ip subnet-zero
+interface VLAN1
+ip address 192.168.1.2 255.255.0.0
+ip default-gateway 192.168.1.1
+line vty 0 155
+password ieee

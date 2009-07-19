@@ -11,6 +11,9 @@ typedef unsigned long long ullong;
 void
 set_goal(char *hex_goal);
 
+void
+build_table();
+
 int
 hamming_distance_from_goal(unsigned char* hash);
 

@@ -230,7 +230,6 @@ slave()
 
       }
     }
-    printf("done!\n");
   }
 }
 

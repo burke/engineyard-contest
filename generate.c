@@ -1,10 +1,14 @@
-#include <stdio.h>
 #include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <openssl/sha.h>
-#include "/opt/local/include/openssl/sha.h"
+#include <openssl/sha.h>
+#include "mpi.h"
 
+/* Local functions */
+
+static void master(void);
+static void slave(void);
 
 #include "hamming_distance.h"
 
@@ -57,36 +61,123 @@ permute_case(ullong seqnum, uchar *phrase)
   }
 }
 
+char *goal;
+
 int
-main(int argc, char* argv[])
+main(int argc, char **argv)
 {
+  int myrank;
+
+  extern char *goal;
+  
+  if (argc) 
+    goal = argv[1];
+  
+  MPI_Init(&argc, &argv);
+  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+  MPI_Barrier(MPI_COMM_WORLD);
+  if (myrank == 0)
+    master();
+  else
+    slave();
+
+  MPI_Finalize();
+  return 0;
+}
+
+static void
+master()
+{
+  char phrase[61] = "ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ";
+  char sfx[6] = "XXXXX";
+
+  extern char *goal;
+    
+  int ntasks, rank;
+  MPI_Status status;
+  long long initial = 0;
+
+  long long int result[3];
+
+  long long int distance, case_perm, suffix_perm, best_distance;
+
+  best_distance = 10000000;
+  
+  /* Find out how many processes there are */
+  MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+
+  if (ntasks == 1)
+    printf("WARNING: Run like this: mpirun -np [Number of processes] ./generate\n");
+    
+  /* Seed the slaves; send one unit of work to each slave. */
+  for (rank = 1; rank < ntasks; ++rank) {
+
+    case_perm = initial + (1000000 * rank);
+
+    /* Send it to each rank */
+    MPI_Send(&case_perm,        /* message buffer */
+             1,                 /* one data item */
+             MPI_LONG_LONG_INT, /* data item is an integer */
+             rank,              /* destination process rank */
+             0,                 /* user chosen message tag */
+             MPI_COMM_WORLD);   /* default communicator */
+  }
+
+  
+  while (1) {
+    MPI_Recv(&result,           /* message buffer */
+             3,                 /* one data item */
+             MPI_LONG_LONG_INT, /* of type double real */
+             MPI_ANY_SOURCE,    /* receive from any sender */
+             MPI_ANY_TAG,       /* any type of message */
+             MPI_COMM_WORLD,    /* default communicator */
+             &status);          /* info about the received message */
+
+    case_perm = result[0];
+    suffix_perm = result[1];
+    distance = result[2];
+
+    if (distance < best_distance)
+    {
+      best_distance = distance;
+
+      permute_case((ullong) case_perm, (uchar*) phrase);
+      permute_suffix((ulong) suffix_perm, (uchar*) sfx);
+      
+      printf("%llu : %llu : %llu : %s%s\n", case_perm, suffix_perm, distance, phrase, sfx);
+      
+    }
+
+  }
+}
+
+
+static void 
+slave()
+{
+  MPI_Status status;
+  extern char *goal;
   uchar phrase[61] = "ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ruby ";
   uchar hash[20];
   uchar sfx[6] = "XXXXX";
   ullong case_perm = 0;
   ulong suffix_perm = 0;
-  int j;
+
+  long long int send_buffer[3];
+
   int distance;
   int min_distance = 1000000;
 
   SHA_CTX *suffctx = (SHA_CTX *) malloc(sizeof(SHA_CTX));
   SHA_CTX *casectx = (SHA_CTX *) malloc(sizeof(SHA_CTX));
-  
-  /* Parse Command Line for starting point (or not) */
-  switch (argc)
-  {
-    case 4:
-      suffix_perm = atoi(argv[3]);
-    case 3:
-      case_perm = atoi(argv[2]);
-    case 2:
-      set_goal(argv[1]);
-      break;
-    default:
-      case_perm = 0;
-      suffix_perm = 0;
-      set_goal("6cac827bae250971a8b1fb6e2a96676f7a077b60");
-  }  
+
+
+
+  MPI_Recv(&case_perm, 1, MPI_LONG_LONG_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+
+  if (!goal)
+    goal = "6cac827bae250971a8b1fb6e2a96676f7a077b60";
+  set_goal(goal);
 
   // openssl/sha.h uses a data structure something like this:
   // 
@@ -102,7 +193,7 @@ main(int argc, char* argv[])
   // rehashing the phrase portion each time the suffix changes
   // ~42% performance boost.
   
-  for (/* case_perm */; case_perm < 1; ++case_perm)
+  for (/* case_perm */; case_perm < CASE_SPACE; ++case_perm)
   {
     permute_case(case_perm, phrase);
 
@@ -110,7 +201,7 @@ main(int argc, char* argv[])
     SHA1_Init(casectx);
     SHA1_Update(casectx, phrase, strlen((char*) phrase));
     
-    for (/* suffix_perm */; suffix_perm < 20000000; ++suffix_perm)
+    for (suffix_perm = 0; suffix_perm < SUFFIX_SPACE; ++suffix_perm)
     {
       // Update sfx with the next suffix.
       permute_suffix(suffix_perm, sfx);
@@ -130,14 +221,17 @@ main(int argc, char* argv[])
         // So it's worth noting that openssl/sha.h returns a strange format.
         // You get an array of unsigned chars, each containing the binary representation
         // of two hex digits, so eg. char 35 is 00010011 or "13" in hex.
-        for (j = 0; j < 20; j++)
-          // Hex representation makes a lot more sense to humans.
-          printf("%02x", hash[j]);
-        printf(" : %llu : %lu : %d : %s%s\n", case_perm, suffix_perm, distance, phrase, sfx);
+
+        send_buffer[0] = (long long int) case_perm;
+        send_buffer[1] = (long long int) suffix_perm;
+        send_buffer[2] = (long long int) distance;
+
+        MPI_Send(&send_buffer, 3, MPI_LONG_LONG_INT, 0, 0, MPI_COMM_WORLD);
+
       }
     }
+    printf("done!\n");
   }
-
-  return EXIT_SUCCESS;
 }
+
 

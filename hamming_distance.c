@@ -14,6 +14,8 @@ void
 set_goal(char* goal)
 {
   int i;
+
+  build_table();
   
   for (i=0; i<20; ++i)
     sscanf(goal+(2*i), "%02x", (unsigned int *) &GOAL[i]);
@@ -53,6 +55,6 @@ hamming_distance_from_goal(uchar* hash)
 
   for (i = 0; i < 20; ++i)
     distance += HAM_TABLE[GOAL[i]][hash[i]];
-    
+
   return distance;
 }

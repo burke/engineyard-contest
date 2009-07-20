@@ -1,9 +1,9 @@
-CC=g++
-CFLAGS=-Wall -pg -O3
-LINK=-lcrypto
+CC=mpicc
+CFLAGS=-Wall -O3
+LINK=-Wl -Bstatic -lcrypto
 
-OBJ=hamming_distance.o generate.o sha1.o
-HDR=hamming_distance.h sha1.h
+OBJ=hamming_distance.o generate.o
+HDR=hamming_distance.h
 TARGET=generate
 
 $(TARGET):$(OBJ) $(HDR)

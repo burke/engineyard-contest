@@ -1,1 +1,2 @@
-mpicc -c generate-mpi.c -o generate-mpi.o; mpicc generate-mpi.o hamming_distance.o -lcrypto -o generate-mpi
+#!/bin/sh
+mpicc -c generate-mpi.c -o generate-mpi.o; mpicc generate-mpi.o hamming_distance.o -Wl -Bstatic -lcrypto -o generate-mpi
